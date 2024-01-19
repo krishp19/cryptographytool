@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cipher Program</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      text-align: center;
+      
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      border: 2px solid black;
+      filter: brightness();
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+        background-color: #c2fbd7;
+        border-radius: 100px;
+        box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
+        color: green;
+        cursor: pointer;
+        display: inline-block;
+        font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+        padding: 7px 20px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 250ms;
+        border: 0;
+        font-size: 16px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+
+    button:hover {
+        box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
+        transform: scale(1.05) rotate(-1deg);
+    }
+
+    #result {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #333;
+        border: 2px solid #45a049;
+        padding: 15px;
+        height: 10px;
+        width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cipher Program</h1>
+  
+  <label for="message">Message:</label>
+  <textarea id="message" rows="4" cols="50"></textarea>
+
+  <label for="key">Key:</label>
+  <input type="text" id="key" placeholder="Enter key">
+
+  <label for="method">Choose a method:</label>
+  <select id="method">
+    <option value="caesar">Caesar Cipher</option>
+    <option value="monoalphabetic">Monoalphabetic Cipher</option>
+    <option value="railfence">Rail Fence Cipher</option>
+    <option value="polyalphabetic">Polyalphabetic (Vigenère) Cipher</option>
+  </select>
+
+  <button onclick="encrypt()">Encrypt</button>
+  <button onclick="decrypt()">Decrypt</button>
+
+  <h2>Result:</h2>
+  <div id="result"></div>
+
+  <script>
+    function encrypt() {
+      const message = document.getElementById('message').value;
+      const key = document.getElementById('key').value;
+      const method = document.getElementById('method').value;
+
+      let result;
+      if (method === 'caesar') {
+        result = caesarCipherEncrypt(message, parseInt(key));
+      } else if (method === 'monoalphabetic') {
+        result = monoalphabeticCipherEncrypt(message);
+      } else if (method === 'railfence') {
+        result = railFenceCipherEncrypt(message);
+      } else if (method === 'polyalphabetic') {
+        result = vigenereCipherEncrypt(message, key);
+      }
+
+      document.getElementById('result').innerText = result;
+    }
+
+    function decrypt() {
+      const message = document.getElementById('message').value;
+      const key = document.getElementById('key').value;
+      const method = document.getElementById('method').value;
+
+      let result;
+      if (method === 'caesar') {
+        result = caesarCipherDecrypt(message, parseInt(key));
+      } else if (method === 'monoalphabetic') {
+        result = monoalphabeticCipherDecrypt(message);
+      } else if (method === 'railfence') {
+        result = railFenceCipherDecrypt(message);
+      } else if (method === 'polyalphabetic') {
+        result = vigenereCipherDecrypt(message, key);
+      }
+
+      document.getElementById('result').innerText = result;
+    }
+
+    // Caesar Cipher Encryption
+    function caesarCipherEncrypt(text, key) {
+      return text
+        .split('')
+        .map(char => {
+          if (char.match(/[a-zA-Z]/)) {
+            const baseCharCode = char.toLowerCase() === char ? 'a'.charCodeAt(0) : 'A'.charCodeAt(0);
+            return String.fromCharCode((char.charCodeAt(0) - baseCharCode + key) % 26 + baseCharCode);
+          } else {
+            return char;
+          }
+        })
+        .join('');
+    }
+
+    // Caesar Cipher Decryption
+    function caesarCipherDecrypt(text, key) {
+      return caesarCipherEncrypt(text, 26 - key);
+    }
+
+    // Monoalphabetic Cipher Encryption
+    function monoalphabeticCipherEncrypt(text) {
+      const key = {
+        'a': 'Q', 'b': 'W', 'c': 'E', 'd': 'R', 'e': 'T',
+        'f': 'Y', 'g': 'U', 'h': 'I', 'i': 'O', 'j': 'P',
+        'k': 'A', 'l': 'S', 'm': 'D', 'n': 'F', 'o': 'G',
+        'p': 'H', 'q': 'J', 'r': 'K', 's': 'L', 't': 'Z',
+        'u': 'X', 'v': 'C', 'w': 'V', 'x': 'B', 'y': 'N',
+        'z': 'M'
+      };
+
+      return text
+        .split('')
+        .map(char => key[char.toLowerCase()] || char)
+        .join('');
+    }
+
+    // Monoalphabetic Cipher Decryption
+    function monoalphabeticCipherDecrypt(text) {
+      const key = {
+        'q': 'a', 'w': 'b', 'e': 'c', 'r': 'd', 't': 'e',
+        'y': 'f', 'u': 'g', 'i': 'h', 'o': 'i', 'p': 'j',
+        'a': 'k', 's': 'l', 'd': 'm', 'f': 'n', 'g': 'o',
+        'h': 'p', 'j': 'q', 'k': 'r', 'l': 's', 'z': 't',
+        'x': 'u', 'c': 'v', 'v': 'w', 'b': 'x', 'n': 'y',
+        'm': 'z'
+      };
+
+      return text
+        .split('')
+        .map(char => key[char.toLowerCase()] || char)
+        .join('');
+    }
+
+    // Rail Fence Cipher Encryption
+    function railFenceCipherEncrypt(text) {
+      const numRows = 2;
+      let grid = new Array(numRows).fill('').map(() => []);
+
+      let row = 0;
+      let direction = 1;
+
+      for (const char of text) {
+        grid[row].push(char);
+        row += direction;
+
+        if (row === 0 || row === numRows - 1) {
+          direction *= -1;
+        }
+      }
+
+      return grid.flat().join('');
+    }
+
+    // Rail Fence Cipher Decryption
+    function railFenceCipherDecrypt(text) {
+      const numRows = 2;
+      let grid = new Array(numRows).fill('').map(() => []);
+
+      let row = 0;
+      let direction = 1;
+
+      for (let i = 0; i < text.length; i++) {
+        grid[row].push('*');
+        row += direction;
+
+        if (row === 0 || row === numRows - 1) {
+          direction *= -1;
+        }
+      }
+
+      let index = 0;
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+          grid[i][j] = text[index++];
+        }
+      }
+
+      row = 0;
+      direction = 1;
+      let result = '';
+
+      for (let i = 0; i < text.length; i++) {
+        result += grid[row].shift();
+        row += direction;
+
+        if (row === 0 || row === numRows - 1) {
+          direction *= -1;
+        }
+      }
+
+      return result;
+    }
+
+    function vigenereCipherEncrypt(text, key) {
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char.match(/[a-zA-Z]/)) {
+          const baseCharCode = char.toLowerCase() === char ? 'a'.charCodeAt(0) : 'A'.charCodeAt(0);
+          const shift = key[i % key.length].toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0);
+          const encryptedChar = String.fromCharCode((char.charCodeAt(0) - baseCharCode + shift) % 26 + baseCharCode);
+          result += encryptedChar;
+        } else {
+          result += char;
+        }
+      }
+      return result;
+    }
+
+    // Vigenere Cipher Decryption
+    function vigenereCipherDecrypt(text, key) {
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char.match(/[a-zA-Z]/)) {
+          const baseCharCode = char.toLowerCase() === char ? 'a'.charCodeAt(0) : 'A'.charCodeAt(0);
+          const shift = key[i % key.length].toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0);
+          const decryptedChar = String.fromCharCode((char.charCodeAt(0) - baseCharCode - shift + 26) % 26 + baseCharCode);
+          result += decryptedChar;
+        } else {
+          result += char;
+        }
+      }
+      return result;
+    }
+  </script>
+</body>
+</html>
